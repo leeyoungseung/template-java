@@ -139,5 +139,83 @@ public class StrUtil {
 			return null;
 	}
 	
+	
+	/**
+	 * 문자열의 배열을 입력하면 CSV파일의 레코드와 같이 구분자로 각 요소를 구분한 문자열을 리턴한다.  
+	 * Return String which split by separator like a record of CSV file, When input String Array.
+	 * 
+	 * @param separator
+	 * @param strs
+	 * @return
+	 */
+	public String makeRecordStr(String separator, String ...strs) {
+		if (strs == null || strs.length == 0) {
+			System.out.println("separator="+separator + ", strs="+strs[0]);
+			return null;
+		}
+		
+		int len = strs.length;
+		StringBuffer res = new StringBuffer("");
+		
+		for (int i = 0; i < len; i++) {
+			 res.append(strs[i]);
+			 if (len == 1 || i == (len - 1 )) break;
+			 if (separator != null) res.append(separator);
+		}
+		
+		return res.toString();
+	}
+	
+	
+	/**
+	 * 문자열의 리스트를 입력하면 CSV파일의 레코드와 같이 구분자로 각 요소를 구분한 문자열을 리턴한다.  
+	 * Return String which split by separator like a record of CSV file, When input String List.
+	 * 
+	 * @param separator
+	 * @param strs
+	 * @return
+	 */
+	public String makeRecordStr(String separator, List<String> list) {
+		if (list == null || list.size() == 0) {
+			System.out.println("separator="+separator + ", list="+list.get(0));
+			return null;
+		}
+			
+		
+		int len = list.size();
+		StringBuffer res = new StringBuffer("");
+		
+		for (int i = 0; i < len; i++) {
+			 res.append(list.get(i));
+			 if (len == 1 || i == (len - 1 )) break;
+			 res.append(separator);
+		}
+		
+		return res.toString();
+	}
+	
 
+	/**
+	 * 문자열의 배열을 입력하면 CSV 형식의 레코드 문자열을 리턴하는 메소드.
+	 * This method return a String format of CSV, When input String Array.
+	 * 
+	 * @param strs
+	 * @return
+	 */
+	public String makeRecodeStrCsvFormat(String ...strs) {
+		return makeRecordStr(",", strs);
+	}
+	
+	
+	/**
+	 * 문자열의 리스트를 입력하면 CSV 형식의 레코드 문자열을 리턴하는 메소드.
+	 * This method return a String format of CSV, When input String List.
+	 * 
+	 * @param strs
+	 * @return
+	 */
+	public String makeRecodeStrCsvFormat(List<String> list) {
+		return makeRecordStr(",", list);
+	}
+	
 }
