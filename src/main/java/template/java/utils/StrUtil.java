@@ -262,8 +262,6 @@ public class StrUtil {
 		return new int[] { startIndex, lastIndex };
 	}
 	
-
-	
 	
 	/**
 	 * 타겟 문자열 안의 패턴(정규표현식)에 해당하는 문자열을 추출하여 리스트에 담아서 리턴한다.
@@ -280,6 +278,45 @@ public class StrUtil {
 		});
 		
 		return list;
+	}
+	
+	
+	/**
+	 * 모든 종류의 공백 (전각, 반각)을 제거한 문자열을 리턴하는 메소드
+	 * This method return a String deleted space of all kinds for example (full-width space character,half-width space character) 
+	 * @param targetStr
+	 * @return
+	 */
+	public String deleteAllSpace(String targetStr) {
+		if (isNullOrEmpty(targetStr))
+			return null;
+		return targetStr.replaceAll("　", " ").replaceAll("\\s+", "");
+	}
+	
+	
+	/**
+	 * 개행문자를 제거한 문자열을 리턴하는 메소드. 개행문자를 직접지정.
+	 * This method return a String deleted lineseparator. Set lineseparator up directly.
+	 * @param lineSeparator
+	 * @param targetStr
+	 * @return
+	 */
+	public String deleteLineSeparator(String lineSeparator, String targetStr) {
+		if (isNullOrEmpty(lineSeparator) || isNullOrEmpty(targetStr))
+			return null;
+		return targetStr.replaceAll(lineSeparator, "");
+	}
+	
+	
+	/**
+	 * 개행문자를 제거한 문자열을 리턴하는 메소드, 예약된 개행문자 설정
+	 * This method return a String deleted lineseparator. Set reserved lineseparator up.
+	 * @param lineSeparator
+	 * @param targetStr
+	 * @return
+	 */
+	public String deleteLineSeparator(String targetStr) {
+		return targetStr.replaceAll("(\r\n|\r|\n|\n\r)", "");
 	}
 	
 	
@@ -366,43 +403,7 @@ public class StrUtil {
 	}
 	
 	
-	/**
-	 * 모든 종류의 공백 (전각, 반각)을 제거한 문자열을 리턴하는 메소드
-	 * This method return a String deleted space of all kinds for example (full-width space character,half-width space character) 
-	 * @param targetStr
-	 * @return
-	 */
-	public String deleteAllSpace(String targetStr) {
-		if (isNullOrEmpty(targetStr))
-			return null;
-		return targetStr.replaceAll("　", " ").replaceAll("\\s+", "");
-	}
-	
-	
-	/**
-	 * 개행문자를 제거한 문자열을 리턴하는 메소드. 개행문자를 직접지정.
-	 * This method return a String deleted lineseparator. Set lineseparator up directly.
-	 * @param lineSeparator
-	 * @param targetStr
-	 * @return
-	 */
-	public String deleteLineSeparator(String lineSeparator, String targetStr) {
-		if (isNullOrEmpty(lineSeparator) || isNullOrEmpty(targetStr))
-			return null;
-		return targetStr.replaceAll(lineSeparator, "");
-	}
-	
-	
-	/**
-	 * 개행문자를 제거한 문자열을 리턴하는 메소드, 예약된 개행문자 설정
-	 * This method return a String deleted lineseparator. Set reserved lineseparator up.
-	 * @param lineSeparator
-	 * @param targetStr
-	 * @return
-	 */
-	public String deleteLineSeparator(String targetStr) {
-		return targetStr.replaceAll("(\r\n|\r|\n|\n\r)", "");
-	}
+
 	
 	
 }
