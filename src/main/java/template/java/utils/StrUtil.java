@@ -403,6 +403,13 @@ public class StrUtil {
 	}
 	
 	
+	
+	public String padding(String target, int length, String strTofillIn) {
+		if (isNullOrEmpty(target) || isNullOrEmpty(strTofillIn) || length <= 0)
+			return null;
+		
+		return String.format("%1$"+length+"s", target).replace(" ", strTofillIn);
+	}
 
 	
 	
