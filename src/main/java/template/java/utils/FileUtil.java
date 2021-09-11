@@ -119,16 +119,21 @@ public class FileUtil {
 	 * @param newPath
 	 * @param override
 	 * @return
+	 * @throws Exception 
 	 */
-	public boolean rename(String oldPath, String newPath, boolean override) {
+	public boolean rename(String oldPath, String newPath, boolean override) throws Exception {
 		File oldFile = new File(oldPath);
 		if (!oldFile.exists()) {
 			return false; // 변경할 파일이나 디렉토리가 없다면
 		}
 		
 		File newFile = new File(newPath);
-		if ( !newFile.exists() && !override ) {
+		if ( newFile.exists() && !override ) {
 			return false; // 덮어쓰기 금지의 경우
+		} else if (newFile.exists() && override) {
+			if (!delete(newFile)) {
+				throw new Exception("Cause : "+newPath);
+			}
 		}
 		
 		return oldFile.renameTo(newFile);
