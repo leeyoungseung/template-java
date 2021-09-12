@@ -28,11 +28,24 @@ public class FileUtil {
 	public final String NEW_LINE_CODE_WINDOW = "\r\n";
 	public final String NEW_LINE_CODE_MAC    = "\r";
 	
+	public String pathSeparator = "/";
+	
+	public String getPathSeparator() {
+		return pathSeparator;
+	}
+
+	public void setPathSeparator(String pathSeparator) {
+		this.pathSeparator = pathSeparator;
+	}
+	
 	
 	/**
 	 * ---------- Java 1.6 version 이하에도 사용가능
 	 */
 	
+
+
+
 	/**
 	 * 파일에 줄단위로 데이터를 입력한다. 기본 개행문자는 "\n"(Linux)
 	 * 
@@ -141,29 +154,24 @@ public class FileUtil {
 	
 	
 	/**
-	 * 파일이나 디렉토리 복사
+	 * 파일 복사
 	 * 
 	 * @param originPath
 	 * @param destPath
-	 * @param rename
+	 * @param override
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean copy(String originPath, String destPath, boolean rename) throws IOException {
-		File originFile = new File(originPath);
+	public boolean copy(File originFile, File destFile, boolean override) throws IOException {
+		
 		if ( !originFile.exists() ) {
-			return false; // 복사할 파일이나 디렉토리가 없다면
+			return false; // 복사할 파일
 		}
 		
-		File destFile = new File(destPath);
-		if ( destFile.exists() && !rename ) {
+		if ( destFile.exists() && !override ) {
 			return false; // 결과 파일이 이미 존재하며, 덮어쓰기 플래그가 false라면 
-			
-		} else if (destFile.exists() && rename) {
-			destPath += "_cp";
 		}
 		
-
 		InputStream is = null;
 		OutputStream os = null;
 		try {
@@ -182,6 +190,19 @@ public class FileUtil {
 		}
 	}
 	
+	/**
+	 * 파일 복사 (파라미터를 문자열로 받기)
+	 * 
+	 * @param originPath
+	 * @param destPath
+	 * @param override
+	 * @return
+	 * @throws IOException
+	 */
+	public boolean copy(String originPath, String destPath, boolean override) throws IOException {
+		return copy(new File(originPath), new File(destPath), override);
+	}
+	
 	
 	/**
 	 * 디렉토리 만들기. 이미 디렉토리가 존재하면 만들지 않는다.
@@ -196,6 +217,64 @@ public class FileUtil {
 		}
 		
 		return new File(path).mkdirs();
+	}
+	
+	/**
+	 * 1. 파라미터를 받아 copyDir() 실행 :  $1 복사대상 디렉토리, $2 복사결과 디렉토리
+	 * 2. 복사대상 디렉토리 또는 파일이 있는지 확인한다. 없다면 false, 있다면 다음처리로
+	 * 3. 복사대상 디렉토리의 내용을 확인해서 파일과 디렉토리에 맞게 복사처리
+	 *  1) 디렉토리라면 : 
+	 *     mkdir $1/확인한 디렉토리 $2/확인한 디렉토리의 복사본
+	 *     파라미터를 받아 copyDir() 실행 : $1 = $1/확인한 디렉토리 $2 = $2/확인한 디렉토리의 복사본
+	 *  2) 파일이라면  : 
+	 *     cp $1/확인한 파일.txt $2/확인한 파일의 복사본.txt
+	 * 4. 처리결과가 성공이면 true, 실패면 false를 리턴
+	 * 
+	 * @param origin : 복사대상
+	 * @param dest   : 복사결과
+	 * @param override : 덮어쓰기 플래그
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean copys(File origin, File dest, boolean override) throws Exception {
+		if (origin.exists()) {
+			
+			if (origin.isDirectory()) {
+				if ( !makeDir(dest.getAbsolutePath())) {
+					throw new Exception("Caused by makeDir="+dest.getAbsolutePath());
+				}
+				
+				for (File f : origin.listFiles()) {
+					 if ( !copys(f, new File(dest.getAbsolutePath() + this.pathSeparator + f.getName()), override)) {
+						 throw new Exception("Caused by copys="+dest.getAbsolutePath());
+					 }
+				}
+				
+				return true;
+
+			} else if (origin.isFile()) {
+				if (copy(origin, dest, true)) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		} 
+		
+		return false;
+	}
+	
+	/**
+	 * 파일 또는 디렉터리 복사
+	 * 
+	 * @param origin
+	 * @param dest
+	 * @param override
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean copys(String origin, String dest, boolean override) throws Exception {
+		return copys(new File(origin), new File(dest), override);
 	}
 	
 	
