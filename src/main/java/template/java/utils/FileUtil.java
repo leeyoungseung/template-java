@@ -393,7 +393,7 @@ public class FileUtil {
 			map.put("parent", target.getParent());
 			map.put("path", target.getPath());
 			map.put("permission", String.valueOf(checkPermission(path)));
-			
+			map.put("lastModified", ""+target.lastModified());
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -408,8 +408,9 @@ public class FileUtil {
 	 * 
 	 * @param path
 	 * @return
+	 * @throws Exception 
 	 */
-	public boolean delete(String path) {
+	public boolean delete(String path) throws Exception {
 		return delete(new File(path));
 	}
 	
@@ -419,15 +420,19 @@ public class FileUtil {
 	 * 
 	 * @param target
 	 * @return
+	 * @throws Exception 
 	 */
-	public boolean delete(File target) {
+	public boolean delete(File target) throws Exception {
 		// 파일또는 디렉토리가 있는지 확인
 		if ( target.isFile() || target.isDirectory() ) {
 			// 디렉토리 인지 확인
 			if (target.isDirectory()) {
 				// 디렉토리안에 파일이 존재하면 디렉토리안의 파일을 먼저 삭제해야함
 				for (File f : target.listFiles()) {
-					delete(f); // 재귀적으로 파일 삭제
+					// 재귀적으로 파일 삭제
+					if ( !delete(f)) {
+						 throw new Exception("Caused by delete="+f.getAbsolutePath());
+					}
 				}	
 			}
 			
