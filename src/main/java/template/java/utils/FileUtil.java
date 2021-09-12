@@ -17,12 +17,12 @@ import java.util.Map;
 
 public class FileUtil {
 
-	public final int PERMISSION_E = 1;
+	public final int PERMISSION_X = 1;
 	public final int PERMISSION_W = 2;
 	public final int PERMISSION_R = 4;
-	public final int PERMISSION_WE = 3;
-	public final int PERMISSION_RE = 5;
-	public final int PERMISSION_RWE = 7;
+	public final int PERMISSION_WX = 3;
+	public final int PERMISSION_RX = 5;
+	public final int PERMISSION_RWX = 7;
 	
 	public final String NEW_LINE_CODE_LINUX  = "\n";
 	public final String NEW_LINE_CODE_WINDOW = "\r\n";
@@ -220,12 +220,12 @@ public class FileUtil {
 	}
 	
 	/**
-	 * 1. 파라미터를 받아 copyDir() 실행 :  $1 복사대상 디렉토리, $2 복사결과 디렉토리
+	 * 1. 파라미터를 받아 copys() 실행 :  $1 복사대상 디렉토리, $2 복사결과 디렉토리
 	 * 2. 복사대상 디렉토리 또는 파일이 있는지 확인한다. 없다면 false, 있다면 다음처리로
 	 * 3. 복사대상 디렉토리의 내용을 확인해서 파일과 디렉토리에 맞게 복사처리
 	 *  1) 디렉토리라면 : 
 	 *     mkdir $1/확인한 디렉토리 $2/확인한 디렉토리의 복사본
-	 *     파라미터를 받아 copyDir() 실행 : $1 = $1/확인한 디렉토리 $2 = $2/확인한 디렉토리의 복사본
+	 *     파라미터를 받아 copys() 실행 : $1 = $1/확인한 디렉토리 $2 = $2/확인한 디렉토리의 복사본
 	 *  2) 파일이라면  : 
 	 *     cp $1/확인한 파일.txt $2/확인한 파일의 복사본.txt
 	 * 4. 처리결과가 성공이면 true, 실패면 false를 리턴
@@ -279,38 +279,6 @@ public class FileUtil {
 	
 	
 	/**
-	 * 파일의 정보 가져오기
-	 * 
-	 * @param path
-	 * @return
-	 */
-	public Map<String, String> getFileInfo(String path) {
-		File target = new File(path);
-		if ( !target.exists() ) {
-			return null; // 복사할 파일이나 디렉토리가 없다면
-		}
-		
-		Map<String, String> map = new HashMap<String, String>();
-		
-		try {
-			map.put("canonicalPath", target.getCanonicalPath());
-			map.put("absolutePath", target.getAbsolutePath());
-			String filename = target.getName();
-			map.put("name", target.getName());
-			map.put("extension", filename.substring(filename.lastIndexOf(".") + 1));
-			map.put("parent", target.getParent());
-			map.put("path", target.getPath());
-			map.put("permission", String.valueOf(checkPermission(path)));
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		return map;
-	}
-	
-	
-	/**
 	 * 파일의 권한을 숫자로 리턴. 실행권한 : 1, 쓰기권한 : 2, 읽기 권한 : 4
 	 * 
 	 * @param path
@@ -324,7 +292,7 @@ public class FileUtil {
 		}
 		
 		Integer permission = 0;
-		permission += (f.canExecute()) ? PERMISSION_E : 0;
+		permission += (f.canExecute()) ? PERMISSION_X : 0;
 		permission += (f.canWrite()) ? PERMISSION_W : 0;
 		permission += (f.canRead()) ? PERMISSION_R : 0;
 		
@@ -352,7 +320,7 @@ public class FileUtil {
 		boolean res = false;
 		
 		switch (permission) {
-		case PERMISSION_E:
+		case PERMISSION_X:
 			res = setPermission(target,false,false,true);
 			break;
 		case PERMISSION_W:
@@ -361,13 +329,13 @@ public class FileUtil {
 		case PERMISSION_R:
 			res = setPermission(target,true,false,false);
 			break;
-		case PERMISSION_WE:
+		case PERMISSION_WX:
 			res = setPermission(target,false,true,true);
 			break;
-		case PERMISSION_RE:
+		case PERMISSION_RX:
 			res = setPermission(target,true,false,true);
 			break;
-		case PERMISSION_RWE:
+		case PERMISSION_RWX:
 			res = setPermission(target,true,true,true);
 			break;
 		default:
@@ -402,6 +370,38 @@ public class FileUtil {
 	}
 	
 	
+	/**
+	 * 파일의 정보 가져오기
+	 * 
+	 * @param path
+	 * @return
+	 */
+	public Map<String, String> getFileInfo(String path) {
+		File target = new File(path);
+		if ( !target.exists() ) {
+			return null; // 복사할 파일이나 디렉토리가 없다면
+		}
+		
+		Map<String, String> map = new HashMap<String, String>();
+		
+		try {
+			map.put("canonicalPath", target.getCanonicalPath());
+			map.put("absolutePath", target.getAbsolutePath());
+			String filename = target.getName();
+			map.put("name", target.getName());
+			map.put("extension", filename.substring(filename.lastIndexOf(".") + 1));
+			map.put("parent", target.getParent());
+			map.put("path", target.getPath());
+			map.put("permission", String.valueOf(checkPermission(path)));
+			
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return map;
+	}
+	
 	
 	/**
 	 * 파일 또는 디렉토리 삭제하기
@@ -412,6 +412,7 @@ public class FileUtil {
 	public boolean delete(String path) {
 		return delete(new File(path));
 	}
+	
 	
 	/**
 	 * 파일 또는 디렉토리 삭제하기
