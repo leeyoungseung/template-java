@@ -2,9 +2,15 @@ package template.java.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import template.java.utils.jsonsub.JsonToObj;
 
 /**
  * JSON 데이터를 지정한 클래스(데이터를 담기위한 클래스) 형식으로 파싱, 
@@ -19,7 +25,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class JsonUtil {
 
-	public ObjectMapper mapper = new ObjectMapper();
+	final private ObjectMapper mapper = new ObjectMapper();
+	
+	public ObjectMapper getObjectMapper() {
+		return this.mapper;
+	}
 	
 	private JsonUtil() {};
 	
@@ -33,12 +43,12 @@ public class JsonUtil {
 	
 	
 	/**
-	 * 지정한 데이터 클래스에 담긴 데이터를 Json형식의 문자열 데이터로 변환해주는 기능.
+	 * Object -> JSON Str
 	 * 
 	 * @param obj : : Json으로 변환하기 위한 데이터 클래스
 	 * @return : Json 문자열을 리턴한다.
 	 */
-	public String makeJsonFromObj(Object obj) {
+	public String ObjToJson(Object obj) {
 		if (obj == null) return null;
 		
 		String res = null;
@@ -52,11 +62,11 @@ public class JsonUtil {
 	
 	
 	/**
-	 * 지정한 데이터 클래스에 담긴 데이터를 Json형식의 File로 변환해주는 기능.
+	 * Object -> JSON File
 	 * 
 	 * @param obj : : Json으로 변환하기 위한 데이터 클래스
 	 */
-	public void makeJsonByteFromObj(Object obj, String filePath) {
+	public void ObjToJson(Object obj, String filePath) {
 		if (obj == null || filePath == null || filePath.equals("")) return ;
 		
 		File f = null;
@@ -71,13 +81,53 @@ public class JsonUtil {
 	
 	
 	/**
-	 * Json 데이터를 파싱하기 위한 메소드.
+	 * JSON Str -> JsonNode
 	 * 
-	 * @param json     : 파싱할 Json데이터
+	 * @param json     : 파싱할 Json 문자열 데이터
+	 * @return
+	 */
+	public JsonNode getJsonNode(String json) {
+		if (json == null) return null;
+		
+		JsonNode res = null;
+		
+		try {
+		    res = mapper.readTree(new File(json));
+		} catch (JsonProcessingException e) { e.printStackTrace(); 
+		} catch (IOException e) { e.printStackTrace(); }
+		
+		return res;
+	}
+	
+	
+	/**
+	 * JSON Str -> JsonNode
+	 * 
+	 * @param json     : 파싱할 Json 파일
+	 * @return
+	 */
+	public JsonNode getJsonNode(File json) {
+		if (json == null) return null;
+		
+		JsonNode res = null;
+		
+		try {
+		    res = mapper.readTree(json);
+		} catch (JsonProcessingException e) { e.printStackTrace(); 
+		} catch (IOException e) { e.printStackTrace(); }
+		
+		return res;
+	}
+	
+	
+	/**
+	 * JSON Str -> Object One
+	 * 
+	 * @param json     : 파싱할 Json 문자열
 	 * @param template : 파싱한 데이터를 담기위한 클래스
 	 * @return
 	 */
-	public Object makeObjFromJson(String json, Class<?> template) {
+	public Object jsonToObj(String json, Class<?> template) {
 		if (json == null) return null;
 		
 		Object res = null;
@@ -85,6 +135,73 @@ public class JsonUtil {
 		try {
 		    res = mapper.readValue(json, template);
 		} catch (JsonProcessingException e) { e.printStackTrace(); }
+		
+		return res;
+	}
+	
+	
+	/**
+	 * JSON File -> Object One
+	 * 
+	 * @param jsonFilePath     : 파싱할 Json파일
+	 * @param template : 파싱한 데이터를 담기위한 클래스
+	 * @return
+	 */
+	public Object jsonToObj(File jsonFilePath, Class<?> template) {
+		if (jsonFilePath == null) return null;
+		
+		Object res = null;
+		
+		try {
+			res = mapper.readValue(jsonFilePath, template);
+
+		} catch (JsonProcessingException e) { e.printStackTrace(); 
+		} catch (IOException e) { e.printStackTrace(); }
+		
+		return res;
+	}
+	
+	
+	/**
+	 * JSON List / Map 등의 묶음 데이터 -> List<Object>, Map<String, Object>로 변환
+	 * 기능확장이 필요하다면 JsonToObj를 구현한 클래스를 생성하여 대응한다.
+	 * 
+	 * @param json          : 파싱할 Json 문자열
+	 * @param JsonToObj     : 파싱할 형식을 지정
+	 * @return
+	 */
+	public Object jsonListToObjList(String json, JsonToObj jsonToObj) {
+		if (json == null) return null;
+		
+		Object res = null;
+		
+		try {
+			res = mapper.readValue(json, jsonToObj.getTypeReference());
+
+		} catch (JsonProcessingException e) { e.printStackTrace(); }
+		
+		return res;
+	}
+	
+	
+	/**
+	 * JSON List / Map 등의 묶음 데이터 파일 -> List<Object>, Map<String, Object>로 변환   
+	 * 기능확장이 필요하다면 JsonToObj를 구현한 클래스를 생성하여 대응한다.
+	 * 
+	 * @param jsonFile     : 파싱할 Json파일
+	 * @param JsonToObj    : 파싱할 형식을 지정
+	 * @return
+	 */
+	public Object jsonListToObjList(File jsonFile, JsonToObj jsonToObj) {
+		if (jsonFile == null) return null;
+		
+		Object res = null;
+		
+		try {
+			res = mapper.readValue(jsonFile, jsonToObj.getTypeReference());
+
+		} catch (JsonProcessingException e) { e.printStackTrace(); 
+		} catch (IOException e) { e.printStackTrace(); }
 		
 		return res;
 	}
