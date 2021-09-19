@@ -1,16 +1,14 @@
 package template.java.data;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.JsonNode;
 
 import template.java.utils.JsonUtil;
-import template.java.utils.jsonsub.JsonToObjUserList;
+import template.java.utils.jsonsub.JsonToObjItemList;
 import template.java.utils.model.Item;
-import template.java.utils.model.ItemListDTO;
 
 public class Data_02_JsonParsing {
 
@@ -71,7 +69,7 @@ public class Data_02_JsonParsing {
 			 */
 			System.out.println("---------- JSON List -> List<Object> ----------");
 			
-			Object obj = ju.jsonListToObjList(new File(args[1]), new JsonToObjUserList());
+			Object obj = ju.jsonListToObjList(new File(args[1]), new JsonToObjItemList());
 			List<Item> items = (List<Item>) obj;
 			for	(Item itemData : items) {
 				System.out.println(itemData.toString());

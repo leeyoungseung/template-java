@@ -1,12 +1,10 @@
 package template.java.utils.model;
 
-import java.util.Date;
-
 public class StockHistory {
 	
 	private int stockHistoryNo;
 	private int count;
-	private Date receivingDate;
+	private String receivingDate;
 	
 	public int getStockHistoryNo() {
 		return stockHistoryNo;
@@ -20,11 +18,11 @@ public class StockHistory {
 	public void setCount(int count) {
 		this.count = count;
 	}
-	public Date getReceivingDate() {
+	public String getReceivingDate() {
 		return receivingDate;
 	}
 	
-	public void setReceivingDate(Date receivingDate) {
+	public void setReceivingDate(String receivingDate) {
 		this.receivingDate = receivingDate;
 	}
 	

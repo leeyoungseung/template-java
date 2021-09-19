@@ -1,5 +1,6 @@
 package template.java.utils.model;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -10,7 +11,7 @@ public class Item {
 	private int itemPrice;
 	private boolean sales;
 	private List<String> images;
-	private List<StockHistory> stockHistory;
+	private List<StockHistory> stockHistories;
 	private String joinDate;
 	
 	
@@ -55,6 +56,7 @@ public class Item {
 
 
 	public List<String> getImages() {
+		if (images == null) images = new ArrayList<String>();
 		return images;
 	}
 
@@ -64,13 +66,14 @@ public class Item {
 	}
 
 
-	public List<StockHistory> getStockHistory() {
-		return stockHistory;
+	public List<StockHistory> getStockHistories() {
+		if (stockHistories == null) stockHistories = new ArrayList<StockHistory>();
+		return stockHistories;
 	}
 
 
-	public void setStockHistory(List<StockHistory> stockHistory) {
-		this.stockHistory = stockHistory;
+	public void setStockHistories(List<StockHistory> stockHistories) {
+		this.stockHistories = stockHistories;
 	}
 
 
@@ -87,7 +90,7 @@ public class Item {
 	@Override
 	public String toString() {
 		return "Item [itemId=" + itemId + ", itemName=" + itemName + ", itemPrice=" + itemPrice + ", sales=" + sales
-				+ ", images=" + images + ", stockHistory=" + stockHistory + ", joinDate=" + joinDate + "]";
+				+ ", images=" + images + ", stockHistories=" + stockHistories + ", joinDate=" + joinDate + "]";
 	}
 	
 	

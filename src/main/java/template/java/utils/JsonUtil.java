@@ -64,10 +64,12 @@ public class JsonUtil {
 	/**
 	 * Object -> JSON File
 	 * 
-	 * @param obj : : Json으로 변환하기 위한 데이터 클래스
+	 * @param obj : Json으로 변환하기 위한 데이터 클래스
+	 * @param filePath : 출력할 JSON파일 경로
+	 * @return : 생성된 파일 객체 리턴
 	 */
-	public void ObjToJson(Object obj, String filePath) {
-		if (obj == null || filePath == null || filePath.equals("")) return ;
+	public File ObjToJson(Object obj, String filePath) {
+		if (obj == null || filePath == null || filePath.equals("")) return null;
 		
 		File f = null;
 		
@@ -77,6 +79,7 @@ public class JsonUtil {
 			
 		} catch (IOException ie) { ie.printStackTrace(); }
 		
+		return f;
 	}
 	
 	
