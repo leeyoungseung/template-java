@@ -12,7 +12,7 @@ public class File_08_SetPermission {
 			
 			String path = args[0];
 			String value = args[1];
-			FileUtil fu = new FileUtil();
+			FileUtil fu = FileUtil.getInstance();
 			
 			System.out.println("Before : "+ fu.checkPermission(path));
 			

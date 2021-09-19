@@ -22,7 +22,7 @@ public class File_03_Rename {
 			String oldPath3 = args[4];
 			String newPath3 = args[5];
 			
-			FileUtil fu = new FileUtil();
+			FileUtil fu = FileUtil.getInstance();
 			System.out.println("Case 1 : "+ fu.rename(oldPath1, newPath1, false));
 			
 			System.out.println("Case 2 : "+ fu.rename(oldPath2, newPath2, false));

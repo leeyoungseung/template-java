@@ -19,7 +19,7 @@ public class File_04_Copy {
 			String newPath2 = args[3];
 			
 			
-			FileUtil fu = new FileUtil();
+			FileUtil fu = FileUtil.getInstance();
 			System.out.println("Case 1 : "+ fu.copy(oldPath1, newPath1, false));
 			
 			System.out.println("Case 2 failure : "+ fu.copy(oldPath2, newPath2, false));

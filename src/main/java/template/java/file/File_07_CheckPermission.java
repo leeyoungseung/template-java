@@ -11,7 +11,7 @@ public class File_07_CheckPermission {
 			}
 
 			String path = args[0];
-			FileUtil fu = new FileUtil();
+			FileUtil fu = FileUtil.getInstance();
 			
 			System.out.println("Result : "+ fu.checkPermission(path));
 			

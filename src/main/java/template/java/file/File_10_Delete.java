@@ -12,7 +12,7 @@ public class File_10_Delete {
 
 			String target = args[0];
 			
-			FileUtil fu = new FileUtil();
+			FileUtil fu = FileUtil.getInstance();
 			
 			System.out.println("Result " +fu.delete(target));
 

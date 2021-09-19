@@ -14,7 +14,7 @@ public class File_06_CopyRecursively {
 			String dest = args[1];
 			String separator = args[2];
 			
-			FileUtil fu = new FileUtil();
+			FileUtil fu = FileUtil.getInstance();
 			fu.setPathSeparator(separator);
 			
 			System.out.println("Result " +fu.copys(origin, dest, true));

@@ -15,7 +15,7 @@ public class File_09_GetInfo {
 			}
 
 			String path = args[0];
-			FileUtil fu = new FileUtil();
+			FileUtil fu = FileUtil.getInstance();
 			
 			Map<String, String> map = fu.getFileInfo(path);
 			

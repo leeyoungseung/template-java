@@ -11,7 +11,7 @@ public class File_02_Read {
 		
 		try {
 			File target = new File(args[0]);
-			FileUtil fu = new FileUtil();
+			FileUtil fu = FileUtil.getInstance();
 			List<String> list = fu.readPerLine(target);
 			
 			list.forEach(res -> {

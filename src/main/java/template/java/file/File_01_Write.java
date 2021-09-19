@@ -18,7 +18,7 @@ public class File_01_Write {
 			contents.add("FileWriteTest02");
 			contents.add("FileWriteTest03");
 			
-			FileUtil fu = new FileUtil();
+			FileUtil fu = FileUtil.getInstance();
 			fu.writePerLine(target, contents);
 			
 			System.exit(0);

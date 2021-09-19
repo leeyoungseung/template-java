@@ -16,6 +16,16 @@ import java.util.List;
 import java.util.Map;
 
 public class FileUtil {
+	
+	private FileUtil() {};
+	
+	public static FileUtil getInstance() {
+		return FileUtilHolder.INSTANCE;
+	}
+	
+	private static class FileUtilHolder {
+		private static final FileUtil INSTANCE = new FileUtil();
+	}
 
 	public final int PERMISSION_X = 1;
 	public final int PERMISSION_W = 2;
@@ -43,7 +53,46 @@ public class FileUtil {
 	 * ---------- Java 1.6 version 이하에도 사용가능
 	 */
 	
-
+	
+	/**
+	 * 파일에 문자열 데이터를 입력한다. 
+	 * 
+	 * @param file
+	 * @param data
+	 * @return
+	 */
+	public boolean write(File file, String data) {
+		return write(file, data, true);
+	}
+	
+	
+	/**
+	 * 파일에 문자열 데이터를 입력한다. 
+	 * 
+	 * @param file
+	 * @param data
+	 * @return
+	 */
+	public boolean write(File file , String data, boolean override) {
+		
+		BufferedWriter wr = null;
+		try {
+			wr = new BufferedWriter(override ? new FileWriter(file, true) : new FileWriter(file));
+			wr.append(data);
+			wr.flush();
+			
+		} catch (IOException ioe) {ioe.printStackTrace(); return false;
+		} finally {
+			if (wr != null) {
+				try {
+					wr.close();
+					wr = null;
+				} catch (IOException ioe) { ioe.printStackTrace(); }
+			}
+		}
+		
+		return true;
+	}
 
 
 	/**

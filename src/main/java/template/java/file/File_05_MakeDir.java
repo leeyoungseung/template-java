@@ -11,7 +11,7 @@ public class File_05_MakeDir {
 			}
 
 			String path = args[0];
-			FileUtil fu = new FileUtil();
+			FileUtil fu = FileUtil.getInstance();
 			
 			System.out.println("Case 1 : "+ fu.makeDir(path));
 			
