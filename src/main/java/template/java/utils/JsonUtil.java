@@ -95,9 +95,8 @@ public class JsonUtil {
 		JsonNode res = null;
 		
 		try {
-		    res = mapper.readTree(new File(json));
-		} catch (JsonProcessingException e) { e.printStackTrace(); 
-		} catch (IOException e) { e.printStackTrace(); }
+		    res = mapper.readTree(json);
+		} catch (JsonProcessingException e) { e.printStackTrace(); } 
 		
 		return res;
 	}
