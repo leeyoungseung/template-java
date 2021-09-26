@@ -15,6 +15,7 @@ import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 
 import template.java.utils.xmlsub.XmlConverter;
@@ -96,6 +97,44 @@ public class XmlUtil {
 		return f;
 	}
 	
+	
+	/**
+	 * XML Str -> JsonNode
+	 * 
+	 * @param json     : 파싱할 Json 문자열 데이터
+	 * @return
+	 */
+	public JsonNode getXmlNode(String json) {
+		if (json == null) return null;
+		
+		JsonNode res = null;
+		
+		try {
+		    res = mapper.readTree(json);
+		} catch (JsonProcessingException e) { e.printStackTrace(); } 
+		
+		return res;
+	}
+	
+	
+	/**
+	 * XML Str -> JsonNode
+	 * 
+	 * @param json     : 파싱할 Json 파일
+	 * @return
+	 */
+	public JsonNode getXmlNode(File json) {
+		if (json == null) return null;
+		
+		JsonNode res = null;
+		
+		try {
+		    res = mapper.readTree(json);
+		} catch (JsonProcessingException e) { e.printStackTrace(); 
+		} catch (IOException e) { e.printStackTrace(); }
+		
+		return res;
+	}
 	
 	
 	/**
