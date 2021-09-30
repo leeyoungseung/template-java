@@ -2,14 +2,14 @@ package template.java.utils.networksub;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 public interface RequestBody {
 
-	void setData(Object data) throws UnsupportedEncodingException;
-	void setData(Object data, String originEncoding, String newEncoding) throws UnsupportedEncodingException;
-	void setData(File target) throws UnsupportedEncodingException, IOException;
-	void setData(File target, String originEncoding, String newEncoding) throws UnsupportedEncodingException, IOException;
-	byte[] getData();
+	void setData(Object data) throws Exception;
+	void setData(File target) throws Exception;
+	byte[] getData() throws Exception;
+	boolean write(OutputStream os) throws Exception;
 	
 }

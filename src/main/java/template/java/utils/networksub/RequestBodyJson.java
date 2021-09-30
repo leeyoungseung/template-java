@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 public class RequestBodyJson implements RequestBody {
@@ -25,7 +26,6 @@ public class RequestBodyJson implements RequestBody {
 
 
 
-	@Override
 	public void setData(Object data, String originEncoding, String newEncoding) throws UnsupportedEncodingException {
 		this.data = translatorStr(((String)data), originEncoding, newEncoding).getBytes(newEncoding);
 	}
@@ -39,7 +39,6 @@ public class RequestBodyJson implements RequestBody {
 	}
 
 
-	@Override
 	public void setData(File target, String originEncoding, String newEncoding)
 			throws UnsupportedEncodingException, IOException {
 		this.data = translatorStr(readFileToStr(target), originEncoding, newEncoding).getBytes(newEncoding);
@@ -105,6 +104,12 @@ public class RequestBodyJson implements RequestBody {
 		} catch (UnsupportedEncodingException e) { e.printStackTrace(); }
 		
 		return decodedStr;
+	}
+
+	@Override
+	public boolean write(OutputStream os) throws Exception {
+		os.write(this.data);
+		return true;
 	}
 	
 

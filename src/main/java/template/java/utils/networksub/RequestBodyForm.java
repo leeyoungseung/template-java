@@ -1,53 +1,95 @@
 package template.java.utils.networksub;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class RequestBodyForm implements RequestBody{
+public class RequestBodyForm implements RequestBody {
 
-	private byte[] data;
+	String BOUNDARY = "-----";
+	String LINEFEED = "\r\n";
+	private PrintWriter writer;
+	private OutputStream os;
 	
-	@Override
-	public void setData(Object data) throws UnsupportedEncodingException {
-		Map <String, String> body = (Map <String, String>) data;
-		
-		StringBuilder sb = new StringBuilder();
-		for (Map.Entry<String, String> entry : body.entrySet()) {
-			sb.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-			sb.append("=");
-			sb.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
-		}
-		
-		this.data = sb.toString().getBytes(StandardCharsets.UTF_8);
-	}
+    public String getBOUNDARY() { return BOUNDARY; }
+	public void setBOUNDARY(String bOUNDARY) { BOUNDARY = bOUNDARY; }
 
-	@Override
-	public void setData(Object data, String originEncoding, String newEncoding) throws UnsupportedEncodingException {
-		// TODO Auto-generated method stub
-		
-	}
 
-	@Override
-	public void setData(File target) throws UnsupportedEncodingException, IOException {
-		// TODO Auto-generated method stub
-		
-	}
+	public void addHeaderField(String name, String value) {
+        writer.append(name + ": " + value).append(LINEFEED);
+        writer.flush();
+    }
+    
+	
+    public void addFilePart(String fieldName, File uploadFile)
+            throws IOException {
+        String fileName = uploadFile.getName();
+        writer.append("--" + BOUNDARY).append(LINEFEED);
+        writer.append(
+                "Content-Disposition: form-data; name=\"" + fieldName
+                        + "\"; filename=\"" + fileName + "\"")
+                .append(LINEFEED);
+        writer.append(
+                "Content-Type: "
+                        + URLConnection.guessContentTypeFromName(fileName))
+                .append(LINEFEED);
+        writer.append("Content-Transfer-Encoding: binary").append(LINEFEED);
+        writer.append(LINEFEED);
+        writer.flush();
 
-	@Override
-	public void setData(File target, String originEncoding, String newEncoding)
-			throws UnsupportedEncodingException, IOException {
-		// TODO Auto-generated method stub
-		
-	}
+        FileInputStream inputStream = new FileInputStream(uploadFile);
+        byte[] buffer = new byte[4096];
+        int bytesRead = -1;
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            os.write(buffer, 0, bytesRead);
+        }
+        os.flush();
+        inputStream.close();
 
-	@Override
-	public byte[] getData() {
-		return this.data;
+        writer.append(LINEFEED);
+        writer.flush();
+    }
+    
+    
+	public boolean sendRequest(OutputStream os) throws Exception {
+        writer.append(LINEFEED).flush();
+        writer.append(BOUNDARY).append(LINEFEED);
+        writer.close();
+
+		return true;
 	}
 	
+	public boolean write(OutputStream os) throws Exception {
+		writer = new PrintWriter(new OutputStreamWriter(os, "utf-8"), true);
+		return true;
+	}
 
+
+	@Override
+	public void setData(Object data) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public void setData(File target) throws Exception {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	@Override
+	public byte[] getData() throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

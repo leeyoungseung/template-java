@@ -18,12 +18,13 @@ public class Net_03_HttpRequestMultipartForm {
 		try {
 
 			uploadOneFile(new File(args[0]));
-			
+			Thread.sleep(1000); // Stream이 완전 종료되기까지 대기
 			
 			File [] files = new File[args.length];
 			for (int i=0; i<args.length; i++) {
 				files[i] = new File(args[i]);
 			}
+			
 			uploadManyFile(files);
 
 		} catch (Exception e) {
