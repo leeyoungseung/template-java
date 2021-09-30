@@ -34,12 +34,17 @@
 package template.java.utils;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 
@@ -59,7 +64,10 @@ public class HttpUtil {
 	private int READ_TIMEOUT_LIMIT       = 0;
 	private RequestBody requestBody;
 	private ResponseBody responseBody;
-	
+	private OutputStream os;
+	private PrintWriter writer; 
+	private String BOUNDARY = "-----";
+	private String LINEFEED = "\r\n";
 
 	public void setRequestBody(RequestBody requestBody) { this.requestBody = requestBody; }
 	public RequestBody getRequestBody() { return requestBody; }
@@ -165,8 +173,8 @@ public class HttpUtil {
 			// 요청보내기
 			this.con.connect();
 			
-			OutputStream os;
 			if (this.formData != null) {
+				System.out.println("exist data");
 				os = this.con.getOutputStream();
 				os.write(this.formData);
 			}
@@ -181,15 +189,6 @@ public class HttpUtil {
 				if (!responseBody.readResult(buff)) {
 					throw new Exception();
 				}
-				
-				// For Debug
-//				System.out.println("-------------- Response Header  --------------");
-//				System.out.println("");
-//			    Map<String, List<String>> map = con.getHeaderFields();
-//			    for (Map.Entry<String, List<String>> entry : map.entrySet()) {
-//			        System.out.println("Key : " + entry.getKey() + 
-//			                 " ,Value : " + entry.getValue());
-//			    }
 				
 			} else {
 				System.err.println("ResponseCode : " + con.getResponseCode() +", ResponseMessage" + con.getResponseMessage());
@@ -213,5 +212,114 @@ public class HttpUtil {
 		    }
 		}
 	}
+	
+
+	/**
+	 * HTTP Multipart/form-data Request 메인
+	 * 
+	 * @param protocol
+	 * @param targetUrl
+	 * @param settings
+	 * @param headers
+	 * @param files
+	 * @return
+	 */
+	public boolean request(String protocol, String targetUrl, Map<String, String> settings, Map<String, String> headers, File ...files) {
+		
+		String fileParam = ( 2 <= files.length ) ? "files" : "file";
+		BufferedReader buff = null;
+		try {
+			// URL에 해당하는 Connection 객체 생성
+			setConnection(protocol, targetUrl);
+			
+			// Request 준비
+			settings.put("Content-Type", "multipart/form-data;charset=utf-8;boundary=" + BOUNDARY);
+			requestSetting(settings);
+			
+			os = this.con.getOutputStream();
+			writer = new PrintWriter(new OutputStreamWriter(os, "utf-8"), true);
+			
+			
+			for (String headerInfoKey : headers.keySet()) {
+				addHeaderField(headerInfoKey, settings.get(headerInfoKey));
+			}
+			
+			for (File file : files) {
+				addFilePart(fileParam, file);
+			}
+			
+			writer.append(LINEFEED).flush();
+	        writer.append("--" + BOUNDARY + "--").append(LINEFEED);
+	        writer.close();
+	        
+			// 응답 확인하기
+			int responseCode = this.con.getResponseCode();
+			
+			if(responseCode == HttpURLConnection.HTTP_OK) {
+				buff = new BufferedReader(
+						new InputStreamReader(this.con.getInputStream(),"utf-8"));
+				
+				if (!responseBody.readResult(buff)) {
+					throw new Exception();
+				}
+				
+			} else {
+				System.err.println("ResponseCode : " + con.getResponseCode() +", ResponseMessage" + con.getResponseMessage());
+				return false;
+			}
+	        
+			return true;
+		} catch (Exception e) { 
+			e.printStackTrace(); 
+			return false;
+		} 
+		
+	}
+	
+	
+	/**
+	 * 헤더를 추가하기
+	 * 
+	 * @param name
+	 * @param value
+	 */
+	private void addHeaderField(String name, String value) {
+        writer.append(name + ": " + value).append(LINEFEED);
+        writer.flush();
+    }
+    
+	
+	/**
+	 * 파일 데이터를 추가하기
+	 * 
+	 * @param fieldName
+	 * @param uploadFile
+	 * @throws IOException
+	 */
+	private void addFilePart(String fieldName, File uploadFile)
+            throws IOException {
+        String fileName = uploadFile.getName();
+        writer.append("--" + BOUNDARY).append(LINEFEED);
+        writer.append("Content-Disposition:form-data;name=\""+ fieldName +"\";filename=\"" + fileName + "\"").append(LINEFEED);
+        writer.append(LINEFEED);
+        writer.append("Content-Type:" + URLConnection.guessContentTypeFromName(fileName)).append(LINEFEED);
+        writer.append(LINEFEED);
+        writer.append("Content-Transfer-Encoding:binary").append(LINEFEED);
+        writer.append(LINEFEED);
+        writer.flush();
+
+        FileInputStream inputStream = new FileInputStream(uploadFile);
+        byte[] buffer = new byte[(int)uploadFile.length()];
+        int bytesRead = -1;
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            os.write(buffer, 0, bytesRead);
+        }
+        os.flush();
+        inputStream.close();
+
+        writer.append(LINEFEED);
+        writer.flush();
+    }
+	
 	
 }
