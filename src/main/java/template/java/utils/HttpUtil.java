@@ -33,10 +33,12 @@
 	 */
 package template.java.utils;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -65,7 +67,9 @@ public class HttpUtil {
 	private RequestBody requestBody;
 	private ResponseBody responseBody;
 	private OutputStream os;
-	private PrintWriter writer; 
+	
+	// For Multipart File data Upload
+	private BufferedOutputStream out;
 	private String BOUNDARY = "-----";
 	private String LINEFEED = "\r\n";
 
@@ -175,8 +179,8 @@ public class HttpUtil {
 			
 			if (this.formData != null) {
 				System.out.println("exist data");
-				os = this.con.getOutputStream();
-				os.write(this.formData);
+				this.os = this.con.getOutputStream();
+				this.os.write(this.formData);
 			}
 			
 			// 응답 확인하기
@@ -202,20 +206,21 @@ public class HttpUtil {
 			return false;
 			
 		} finally {
-		    if (buff != null) {
-		    	try {
-		    		buff.close();
-		    		buff = null;
-		    		this.con.disconnect();
-		    		this.con = null;
-				} catch (Exception e) { e.printStackTrace(); }
-		    }
+	    	try {
+		        if (buff != null) {
+	    		    buff.close();
+	    		    buff = null;
+		        }
+		    	this.con.disconnect();
+		    	this.con = null;
+		    	this.os.close();
+		    	this.os = null;
+			} catch (Exception e) { e.printStackTrace(); }
 		}
 	}
 	
-
 	/**
-	 * HTTP Multipart/form-data Request 메인
+	 * 【Multipart/form-data】HTTP Request 메인
 	 * 
 	 * @param protocol
 	 * @param targetUrl
@@ -224,8 +229,8 @@ public class HttpUtil {
 	 * @param files
 	 * @return
 	 */
-	public boolean request(String protocol, String targetUrl, Map<String, String> settings, Map<String, String> headers, File ...files) {
-		
+	public boolean request(String protocol, String targetUrl, Map<String, String> settings, Map<String, String> params, File ...files) {
+		// 파일 한개 전송시는 file, 여러개 전송시는 files로 파라미터 설정
 		String fileParam = ( 2 <= files.length ) ? "files" : "file";
 		BufferedReader buff = null;
 		try {
@@ -237,21 +242,45 @@ public class HttpUtil {
 			requestSetting(settings);
 			
 			os = this.con.getOutputStream();
-			writer = new PrintWriter(new OutputStreamWriter(os, "utf-8"), true);
+			out =  new BufferedOutputStream(os);
+			int contentLength = 0;
+			contentLength += write(out, LINEFEED);
 			
-			
-			for (String headerInfoKey : headers.keySet()) {
-				addHeaderField(headerInfoKey, settings.get(headerInfoKey));
+			if (params.size() > 0) {
+				contentLength += write(out, addParams(params));
 			}
+			out.flush();
 			
 			for (File file : files) {
-				addFilePart(fileParam, file);
+	            contentLength += write(out, ("--" + BOUNDARY + LINEFEED));
+	            StringBuffer header = new StringBuffer(); 
+	            		
+	            		
+	            header.append("Content-Disposition: form-data;name=\""+ fileParam +"\";filename=\"" + file.getName()  + "\"").append(LINEFEED);
+	            header.append(LINEFEED);
+	            header.append("Content-Type:" + URLConnection.guessContentTypeFromName(file.getName())).append(LINEFEED);
+	            header.append(LINEFEED);
+	            header.append("Content-Transfer-Encoding:binary").append(LINEFEED);
+	            header.append(LINEFEED);
+	            
+	            contentLength += write(out, header.toString());
+	            contentLength += write(out, LINEFEED);
+
+	            InputStream inputStream = new FileInputStream(file);
+	            byte[] input = new byte[inputStream.available()];
+	            while(inputStream.read(input) > -1) {
+	                contentLength += input.length;
+	                write(out, input);
+	            }
+
+	            contentLength += write(out, LINEFEED);
 			}
 			
-			writer.append(LINEFEED).flush();
-	        writer.append("--" + BOUNDARY + "--").append(LINEFEED);
-	        writer.close();
-	        
+			contentLength += write(out , "--" + BOUNDARY + "--"+ LINEFEED);
+			out.flush();
+			out.close(); // -- 보내야할 데이터 설정완료, 요청보내기
+			
+			
 			// 응답 확인하기
 			int responseCode = this.con.getResponseCode();
 			
@@ -272,54 +301,70 @@ public class HttpUtil {
 		} catch (Exception e) { 
 			e.printStackTrace(); 
 			return false;
-		} 
+			
+		} finally {
+			try {
+				if (buff != null) {
+					buff.close();
+	    		    buff = null;
+				}
+	    		this.con.disconnect();
+	    		this.con = null;
+				this.os.close(); 
+				this.os = null;
+			} catch (IOException e) {  e.printStackTrace(); }
+		}
 		
 	}
 	
 	
 	/**
-	 * 헤더를 추가하기
+	 * 【Multipart/form-data】파라미터를 설정 준비
 	 * 
-	 * @param name
-	 * @param value
+	 * @param textDataMap
+	 * @return
 	 */
-	private void addHeaderField(String name, String value) {
-        writer.append(name + ": " + value).append(LINEFEED);
-        writer.flush();
+	private String addParams(Map<String, String> params) {
+        StringBuilder body = new StringBuilder();
+        body.append(LINEFEED);
+
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+            body
+                .append("--").append(BOUNDARY).append(LINEFEED)
+                .append("Content-Disposition: form-data; name=\"").append(entry.getKey()).append("\"").append(LINEFEED)
+                .append(LINEFEED)
+                .append(entry.getValue()).append(LINEFEED);
+        }
+
+        return body.toString();
     }
     
 	
 	/**
-	 * 파일 데이터를 추가하기
+	 * 【Multipart/form-data】폼에 파라미터 설정하기 
 	 * 
-	 * @param fieldName
-	 * @param uploadFile
+	 * @param out
+	 * @param string
+	 * @return
 	 * @throws IOException
 	 */
-	private void addFilePart(String fieldName, File uploadFile)
-            throws IOException {
-        String fileName = uploadFile.getName();
-        writer.append("--" + BOUNDARY).append(LINEFEED);
-        writer.append("Content-Disposition:form-data;name=\""+ fieldName +"\";filename=\"" + fileName + "\"").append(LINEFEED);
-        writer.append(LINEFEED);
-        writer.append("Content-Type:" + URLConnection.guessContentTypeFromName(fileName)).append(LINEFEED);
-        writer.append(LINEFEED);
-        writer.append("Content-Transfer-Encoding:binary").append(LINEFEED);
-        writer.append(LINEFEED);
-        writer.flush();
-
-        FileInputStream inputStream = new FileInputStream(uploadFile);
-        byte[] buffer = new byte[(int)uploadFile.length()];
-        int bytesRead = -1;
-        while ((bytesRead = inputStream.read(buffer)) != -1) {
-            os.write(buffer, 0, bytesRead);
-        }
-        os.flush();
-        inputStream.close();
-
-        writer.append(LINEFEED);
-        writer.flush();
+    private int write(BufferedOutputStream out, String string) throws IOException {
+        out.write(string.getBytes("UTF-8"));
+        return string.length();
     }
-	
+
+    
+    /**
+     *【Multipart/form-data】폼에 파일 데이터 설정하기
+     * 
+     * @param out
+     * @param bytes
+     * @return
+     * @throws IOException
+     */
+    private int write(BufferedOutputStream out, byte[] bytes) throws IOException {
+        out.write(bytes);
+        return bytes.length;
+    }
 	
 }
