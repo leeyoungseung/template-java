@@ -1,0 +1,10 @@
+com.mysql.jdbc.Driver
+jdbc:mysql://localhost:3306/
+board_test?serverTimezone=UTC
+root
+1234
+10
+10
+5
+5
+SELECT 1
