@@ -1,6 +1,10 @@
 package template.java.utils;
 
 import java.sql.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.dbcp.ConnectionFactory;
 import org.apache.commons.dbcp.DriverManagerConnectionFactory;
@@ -204,5 +208,87 @@ public class DBUtil {
 	}
 
 	
+	/**
+	 * INSERT 또는 UPDATE SQL을 실행하기위한 메서드 
+	 * @param sql
+	 * @param params
+	 * @param connection
+	 * @return
+	 * @throws SQLException
+	 */
+	public boolean executeUpdateSql(String sql, List params) throws SQLException {
+		return executeUpdateSql(sql, params, getConnection());
+	}
+	
+	
+	/**
+	 * INSERT 또는 UPDATE SQL을 실행하기위한 메서드 
+	 * @param sql
+	 * @param params
+	 * @param connection
+	 * @return
+	 * @throws SQLException
+	 */
+	public boolean executeUpdateSql(String sql, List params, Connection connection) throws SQLException {
+		Connection con = connection;
+		PreparedStatement ps = null;
+		ps = con.prepareStatement(sql);
+		setSqlParams(ps, params);
+		
+		int res = ps.executeUpdate();
+		if (res > 0) {
+			con.commit();
+			return true;
+		} else {
+			con.rollback();
+			return false;
+		}
+	}
+	
+
+	/**
+	 * SQL에 파라미터를 설정하기위한 메서드
+	 * @param ps
+	 * @param params
+	 * @return
+	 * @throws SQLException
+	 */
+	private boolean setSqlParams(PreparedStatement ps, List params) throws SQLException {
+
+		int index = 1;
+		for (Object obj : params) {
+			if (obj instanceof String) {
+				System.out.println("param String value =["+(String)obj+"]");
+				ps.setString(index, (String)obj);
+				index++;
+			} else if (obj instanceof Integer) {
+				System.out.println("param Integer value =["+(Integer)obj+"]");
+				ps.setInt(index, (Integer)obj);
+				index++;
+			} else if (obj instanceof Long) {
+				System.out.println("param Long value =["+(Long)obj+"]");
+				ps.setLong(index, (Long)obj);
+				index++;
+			} else if (obj instanceof Double) {
+				System.out.println("param Double value =["+(Double)obj+"]");
+				ps.setDouble(index, (Double)obj);
+				index++;
+			} else if (obj instanceof Boolean) {
+				System.out.println("param Boolean value =["+(Boolean)obj+"]");
+				ps.setBoolean(index, (Boolean)obj);
+				index++;
+			} else if (obj instanceof java.util.Date) {
+				System.out.println("param Date value =["+((java.util.Date)obj).getTime()+"]");
+				ps.setDate(index, new java.sql.Date(((java.util.Date)obj).getTime()));
+				index++;
+			} else {
+				System.out.println("Parameter Error ");
+				return false;
+			}
+			
+		}
+		
+		return true;
+	}
 
 }
