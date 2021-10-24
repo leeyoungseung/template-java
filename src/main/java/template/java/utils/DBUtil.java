@@ -290,5 +290,36 @@ public class DBUtil {
 		
 		return true;
 	}
+	
+	
+	/**
+	 * Select SQL을 실행하기위한 메서드 
+	 * @param sql
+	 * @param params
+	 * @return
+	 * @throws SQLException
+	 */
+	public ResultSet executeSelectSql(String sql, List params) throws SQLException {
+		return executeSelectSql(sql, params, getConnection());
+	}
+	
+	
+	/**
+	 * Select SQL을 실행하기위한 메서드 
+	 * @param sql
+	 * @param params
+	 * @param connection
+	 * @return
+	 * @throws SQLException
+	 */
+	public ResultSet executeSelectSql(String sql, List params, Connection connection) throws SQLException {
+		Connection con = connection;
+		PreparedStatement ps = null;
+		
+		ps = con.prepareStatement(sql);
+		setSqlParams(ps, params);
+		
+		return ps.executeQuery();
+	}
 
 }
